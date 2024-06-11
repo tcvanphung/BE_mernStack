@@ -89,7 +89,7 @@ const loginUser = (UserLogin) => {
 //------ updateUser
 const updateUser = (id, data) => {
 	return new Promise(async (resolve, reject) => {
-		const { name, email, password, confirmPassword, phone } = updateUser
+		// const { name, email, password, confirmPassword, phone } = updateUser
 		try {
 			const checkUser = await User.findOne({
 				_id: id
@@ -108,6 +108,75 @@ const updateUser = (id, data) => {
 				date: updateUser
 			})
 		} catch (e) {
+			reject(e)
+		}
+	})
+}
+
+
+//------deleteUser
+const deleteUser = (id) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const checkUser = await User.findOne({
+				_id: id
+			})
+			if (checkUser === null) {
+				resolve({
+					status: 'OK',
+					message: 'The user is not defined',
+				})
+			}
+
+			await User.findByIdAndDelete(id)
+			resolve({
+				status: 'OK',
+				message: 'Delete user SUCCESS',
+			})
+		} catch (e) {
+			console.log(e)
+			reject(e)
+		}
+	})
+}
+
+//------getAllUser
+const getAllUser = (id) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const allUser = await User.find()
+			resolve({
+				status: 'OK',
+				message: 'Success',
+				data: allUser
+			})
+		} catch (e) {
+			console.log(e)
+			reject(e)
+		}
+	})
+}
+
+
+//------getDetailsUser
+const getDetailsUser = (id) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const user = await User.findOne({
+				_id: id
+			})
+			if (user === null) {
+				resolve({
+					status: 'OK',
+					message: 'The user is not defined',
+				})
+			}
+			resolve({
+				status: 'OK',
+				message: 'SUCCESS',
+				data: user
+			})
+		} catch (e) {
 			console.log(e)
 			reject(e)
 		}
@@ -117,5 +186,8 @@ const updateUser = (id, data) => {
 module.exports = {
 	createUser,
 	loginUser,
-	updateUser
+	updateUser,
+	deleteUser,
+	getAllUser,
+	getDetailsUser,
 }
