@@ -7,7 +7,7 @@ const createUser = async (req, res) => {
 		const { name, email, password, confirmPassword, phone } = req.body
 		const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 		const isCheckEmail = reg.test(email)
-		if (!name || !email || !password || !confirmPassword || !phone) {
+		if (!email || !password || !confirmPassword) {
 			return res.status(200).json({
 				status: 'ERR',
 				message: 'The input is required'
@@ -24,7 +24,6 @@ const createUser = async (req, res) => {
 				message: 'The password is equal confirmPassword'
 			})
 		}
-		console.log('isCheckEmail', isCheckEmail)
 		const response = await UserService.createUser(req.body)
 		return res.status(200).json(response)
 	} catch (e) {
@@ -37,22 +36,47 @@ const createUser = async (req, res) => {
 //---- loginUser
 const loginUser = async (req, res) => {
 	try {
-		const { name, email, password, confirmPassword, phone } = req.body
+		const { email, password } = req.body
 		const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 		const isCheckEmail = reg.test(email)
 		if (!email || !password) {
-			return res.status(200).json({
+			return res.status(401).json({
 				status: 'ERR',
-				message: 'The input is required'
+				message: 'The email or password is required'
 			})
 		} else if (!isCheckEmail) {
-			return res.status(200).json({
+			return res.status(401).json({
 				status: 'ERR',
 				message: 'The input is email'
 			})
 		}
 		const response = await UserService.loginUser(req.body)
-		return res.status(200).json(response)
+		const { refresh_token, ...newReponse } = response
+
+		res.cookie('refresh_token', refresh_token, {
+			httpOnly: true,
+			// secure: true, https
+			secure: false,
+			samesite: 'strict'
+
+		})
+
+		return res.status(200).json(newReponse)
+	} catch (e) {
+		return res.status(404).json({
+			message: e
+		})
+	}
+}
+
+// logoutUser
+const logoutUser = async (req, res) => {
+	try {
+		res.clearCookie('refresh_token')
+		return res.status(200).json({
+			status: 'OK',
+			message: 'Logout successfully'
+		})
 	} catch (e) {
 		return res.status(404).json({
 			message: e
@@ -137,7 +161,7 @@ const getDetailsUser = async (req, res) => {
 //------ refreshToken
 const refreshToken = async (req, res) => {
 	try {
-		const token = req.headers.token.split(' ')[1]
+		const token = req.cookies.refresh_token
 		if (!token) {
 			return res.status(200).json({
 				status: 'ERR',
@@ -162,5 +186,6 @@ module.exports = {
 	deleteUser,
 	getAllUser,
 	getDetailsUser,
-	refreshToken
+	refreshToken,
+	logoutUser
 }
