@@ -4,14 +4,14 @@ const { genneralAccessToken, genneralRefreshToken } = require("./JwtService")
 
 const createUser = (newUser) => {
 	return new Promise(async (resolve, reject) => {
-		const { name, email, password, confirmPassword, phone } = newUser
+		const { name, email, password, phone } = newUser
 		try {
 			const checkUser = await User.findOne({
 				email: email
 			})
 			if (checkUser !== null) {
 				resolve({
-					status: 'OK',
+					status: 'ERR',
 					message: 'The email is already',
 				})
 			}
@@ -42,14 +42,14 @@ const createUser = (newUser) => {
 //------ loginUser
 const loginUser = (UserLogin) => {
 	return new Promise(async (resolve, reject) => {
-		const { name, email, password, confirmPassword, phone } = UserLogin
+		const { email, password } = UserLogin
 		try {
 			const checkUser = await User.findOne({
 				email: email
 			})
 			if (checkUser === null) {
 				resolve({
-					status: 'OK',
+					status: 'ERR',
 					message: 'The user is not defined',
 				})
 			}
@@ -57,7 +57,7 @@ const loginUser = (UserLogin) => {
 
 			if (!comparePassword) {
 				resolve({
-					status: 'OK',
+					status: 'ERR',
 					message: 'The password or user is incorrect',
 				})
 			}
